@@ -1,0 +1,181 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>cn.bc</groupId>
+	<version>0.1-SNAPSHOT</version>
+	<artifactId>bc-cracker</artifactId>
+	<description>破解器</description>
+	<name>bc-cracker</name>
+	<packaging>jar</packaging>
+
+	<properties>
+		<my>my</my>
+	</properties>
+	<build>
+		<defaultGoal>package</defaultGoal>
+		<!-- 替换文件中的${...}标记的值 -->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+					<include>**/log4j.xml</include>
+				</includes>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.5</source>
+						<target>1.5</target>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.3</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.8</version>
+					<configuration>
+						<includes>
+							<include>**/*Test.java</include>
+							<include>**/Test*.java</include>
+							<include>**/*TestCase.java</include>
+							<include>**/*Tests.java</include>
+						</includes>
+						<excludes>
+							<exclude>**/Abstract*.java</exclude>
+						</excludes>
+						<argLine>-Xmx256m</argLine>
+					</configuration>
+				</plugin>
+
+				<!-- <plugin> <groupId>org.mortbay.jetty</groupId> <artifactId>maven-jetty-plugin</artifactId> 
+					<version>6.1.9</version> </plugin> -->
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+					<!-- 修改端口：mvn jetty:run -Djetty.port=8081 -->
+
+					<!-- 配置参考：http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+					<configuration>
+						<!--<scanIntervalSeconds>10</scanIntervalSeconds> -->
+						<webAppConfig>
+							<contextPath>${jetty.path}</contextPath><!--默认为： /${project.artifactId} -->
+							<defaultsDescriptor>src/main/resources/webdefault.xml</defaultsDescriptor>
+						</webAppConfig>
+						<connectors>
+							<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+								<port>${jetty.port}</port>
+								<maxIdleTime>60000</maxIdleTime>
+							</connector>
+						</connectors>
+					</configuration>
+
+					<dependencies>
+						<!-- adding a dependency on jetty-servlets:GZip compression and other 
+							jetty extensions -->
+						<dependency>
+							<groupId>org.eclipse.jetty</groupId>
+							<artifactId>jetty-servlets</artifactId>
+							<version>${jetty.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.6</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<configuration>
+								<tasks>
+									<!-- 下面可以传入一些Maven变量 -->
+									<property name="compile_classpath" refid="maven.compile.classpath" />
+									<property name="runtime_classpath" refid="maven.runtime.classpath" />
+									<property name="test_classpath" refid="maven.test.classpath" />
+									<property name="plugin_classpath" refid="maven.plugin.classpath" />
+
+									<ant antfile="${basedir}/build.xml">
+										<target name="build" />
+									</ant>
+								</tasks>
+							</configuration>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<!-- 版本发布工具 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.1</version>
+					<configuration>
+						<!--<tagBase>https://svn.apache.org/repos/asf/maven/components/releases</tagBase> -->
+					</configuration>
+				</plugin>
+				<!-- 版本管理工具 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-plugin</artifactId>
+					<version>1.5</version>
+					<configuration>
+						<!--<goals>install</goals> -->
+						<connectionType>developerConnection</connectionType>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.14.0-GA</version>
+		</dependency>
+	</dependencies>
+</project>
